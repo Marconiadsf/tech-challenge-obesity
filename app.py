@@ -75,6 +75,9 @@ traducao_transporte = {
 @st.cache_resource
 def treinar_modelo():
     df = pd.read_csv("Obesity.csv")
+    
+# Remover duplicatas para manter consistência com o notebook
+    df = df.drop_duplicates().reset_index(drop=True)
 
     # Remoção de Weight e Height para reduzir risco de data leakage
     X = df.drop(columns=["Obesity", "Weight", "Height"])
