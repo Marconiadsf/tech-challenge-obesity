@@ -22,6 +22,112 @@ st.set_page_config(
 
 
 # ======================================================
+# CSS customizado
+# ======================================================
+
+st.markdown(
+    """
+    <style>
+    .main-title {
+        font-size: 42px;
+        font-weight: 800;
+        color: #1f2b3d;
+        margin-bottom: 8px;
+    }
+
+    .subtitle {
+        font-size: 18px;
+        color: #4b5563;
+        margin-bottom: 28px;
+    }
+
+    .section-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1f2b3d;
+        margin-top: 25px;
+        margin-bottom: 10px;
+    }
+
+    .info-box {
+        background-color: #fff8db;
+        color: #7a5c00;
+        padding: 18px 22px;
+        border-radius: 12px;
+        border-left: 6px solid #f2c94c;
+        margin-bottom: 24px;
+        font-size: 16px;
+    }
+
+    .success-box {
+        background-color: #e9f9ef;
+        color: #14532d;
+        padding: 18px 22px;
+        border-radius: 12px;
+        border-left: 6px solid #22c55e;
+        margin-bottom: 24px;
+        font-size: 16px;
+    }
+
+    .kpi-card {
+        background: linear-gradient(135deg, #1f2b3d 0%, #111827 100%);
+        padding: 24px 18px;
+        border-radius: 14px;
+        text-align: center;
+        box-shadow: 0px 4px 14px rgba(0,0,0,0.18);
+        min-height: 120px;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .kpi-title {
+        color: #93a4c7;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+    }
+
+    .kpi-value {
+        color: #ffffff;
+        font-size: 34px;
+        font-weight: 850;
+    }
+
+    .model-card {
+        background-color: #f8fafc;
+        border: 1px solid #e5e7eb;
+        padding: 22px;
+        border-radius: 14px;
+        margin-bottom: 20px;
+    }
+
+    .small-caption {
+        color: #6b7280;
+        font-size: 14px;
+    }
+
+    .stButton>button {
+        background-color: #1f2b3d;
+        color: white;
+        border-radius: 10px;
+        padding: 0.6rem 1.2rem;
+        border: none;
+        font-weight: 700;
+    }
+
+    .stButton>button:hover {
+        background-color: #111827;
+        color: white;
+        border: none;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# ======================================================
 # Dicionários de tradução
 # ======================================================
 
@@ -172,11 +278,23 @@ def obter_importancia_features(modelo, X):
     return df_imp
 
 
+def card_kpi(titulo, valor):
+    st.markdown(
+        f"""
+        <div class="kpi-card">
+            <div class="kpi-title">{titulo}</div>
+            <div class="kpi-value">{valor}</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
 # ======================================================
 # Sidebar
 # ======================================================
 
-st.sidebar.title("Navegação")
+st.sidebar.title("⚕️ Navegação")
 
 pagina = st.sidebar.radio(
     "Escolha uma página:",
@@ -187,7 +305,7 @@ st.sidebar.divider()
 
 st.sidebar.info(
     "Tech Challenge - Fase 4\n\n"
-    "Modelo preditivo para apoio à análise do nível de obesidade."
+    "Sistema preditivo para apoio à análise do nível de obesidade."
 )
 
 
@@ -197,30 +315,44 @@ st.sidebar.info(
 
 if pagina == "Predição":
 
-    st.title("⚕️ Sistema Preditivo de Nível de Obesidade")
+    st.markdown('<div class="main-title">⚕️ Sistema Preditivo de Nível de Obesidade</div>', unsafe_allow_html=True)
 
-    st.write(
+    st.markdown(
         """
-        Esta aplicação utiliza Machine Learning para auxiliar a equipe médica
-        na estimativa do nível de obesidade de um paciente com base em hábitos alimentares,
+        <div class="subtitle">
+        Ferramenta de apoio à decisão para estimar o nível de obesidade com base em hábitos alimentares,
         histórico familiar, atividade física e estilo de vida.
-        """
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    st.warning(
+    st.markdown(
         """
-        Este sistema é uma ferramenta de apoio à decisão e não substitui avaliação médica profissional.
-
-        As variáveis **peso** e **altura** foram removidas do modelo para reduzir risco de *data leakage*,
+        <div class="info-box">
+        <b>Aviso importante:</b> este sistema é uma ferramenta de apoio à decisão e não substitui avaliação médica profissional.
+        <br><br>
+        As variáveis <b>peso</b> e <b>altura</b> foram removidas do modelo para reduzir risco de <i>data leakage</i>,
         já que o nível de obesidade pode estar diretamente relacionado ao IMC.
-        """
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    st.metric("Acurácia do modelo", f"{acuracia:.2%}")
+    card1, card2, card3 = st.columns(3)
+
+    with card1:
+        card_kpi("Modelo", "Random Forest")
+
+    with card2:
+        card_kpi("Acurácia", f"{acuracia:.1%}")
+
+    with card3:
+        card_kpi("Variáveis usadas", f"{len(colunas_modelo)}")
 
     st.divider()
 
-    st.header("Dados do paciente")
+    st.markdown('<div class="section-title">Dados do Paciente</div>', unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
 
@@ -231,51 +363,16 @@ if pagina == "Predição":
         favc_pt = st.selectbox("Consome alimentos altamente calóricos com frequência?", ["Sim", "Não"])
 
     with col2:
-        fcvc = st.slider(
-            "Frequência de consumo de vegetais",
-            min_value=1.0,
-            max_value=3.0,
-            value=2.0,
-            step=0.1
-        )
-
-        ncp = st.slider(
-            "Número de refeições principais por dia",
-            min_value=1.0,
-            max_value=4.0,
-            value=3.0,
-            step=0.1
-        )
-
+        fcvc = st.slider("Frequência de consumo de vegetais", min_value=1.0, max_value=3.0, value=2.0, step=0.1)
+        ncp = st.slider("Número de refeições principais por dia", min_value=1.0, max_value=4.0, value=3.0, step=0.1)
         caec_pt = st.selectbox("Come entre as refeições?", ["Não", "Às vezes", "Frequentemente", "Sempre"])
         smoke_pt = st.selectbox("Fuma?", ["Sim", "Não"])
 
     with col3:
-        ch2o = st.slider(
-            "Consumo diário de água",
-            min_value=1.0,
-            max_value=3.0,
-            value=2.0,
-            step=0.1
-        )
-
+        ch2o = st.slider("Consumo diário de água", min_value=1.0, max_value=3.0, value=2.0, step=0.1)
         scc_pt = st.selectbox("Monitora calorias ingeridas?", ["Sim", "Não"])
-
-        faf = st.slider(
-            "Frequência de atividade física",
-            min_value=0.0,
-            max_value=3.0,
-            value=1.0,
-            step=0.1
-        )
-
-        tue = st.slider(
-            "Tempo usando dispositivos tecnológicos",
-            min_value=0.0,
-            max_value=2.0,
-            value=1.0,
-            step=0.1
-        )
+        faf = st.slider("Frequência de atividade física", min_value=0.0, max_value=3.0, value=1.0, step=0.1)
+        tue = st.slider("Tempo usando dispositivos tecnológicos", min_value=0.0, max_value=2.0, value=1.0, step=0.1)
 
     col4, col5 = st.columns(2)
 
@@ -291,7 +388,7 @@ if pagina == "Predição":
             ["Transporte Público", "Caminhada", "Automóvel", "Moto", "Bicicleta"]
         )
 
-    # Converter português de volta para os valores originais do dataset/modelo
+    # Converter português para os valores originais do dataset/modelo
     gender = {"Feminino": "Female", "Masculino": "Male"}[gender_pt]
     family_history = {"Sim": "yes", "Não": "no"}[family_history_pt]
     favc = {"Sim": "yes", "Não": "no"}[favc_pt]
@@ -345,8 +442,16 @@ if pagina == "Predição":
         predicao = modelo.predict(dados_paciente)[0]
         predicao_pt = traducao_obesidade.get(predicao, predicao)
 
-        st.subheader("Resultado da previsão")
-        st.success(f"Nível previsto: {predicao_pt}")
+        st.markdown('<div class="section-title">Resultado da Previsão</div>', unsafe_allow_html=True)
+
+        st.markdown(
+            f"""
+            <div class="success-box">
+            <b>Nível previsto:</b> {predicao_pt}
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
         if hasattr(modelo, "predict_proba"):
             probabilidades = modelo.predict_proba(dados_paciente)[0]
@@ -377,20 +482,26 @@ if pagina == "Predição":
 
 elif pagina == "Dashboard Analítico":
 
-    st.title("📊 Dashboard Analítico — Fatores Associados à Obesidade")
+    st.markdown('<div class="main-title">📊 Dashboard Analítico — Padrões de Obesidade</div>', unsafe_allow_html=True)
 
-    st.write(
+    st.markdown(
         """
-        Este painel apresenta uma visão analítica dos principais padrões encontrados na base de dados,
-        com foco em fatores comportamentais, histórico familiar e estilo de vida associados ao nível de obesidade.
-        """
+        <div class="subtitle">
+        Insights sobre a distribuição dos níveis de obesidade e fatores associados ao comportamento,
+        histórico familiar e estilo de vida dos pacientes.
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    st.info(
+    st.markdown(
         """
+        <div class="info-box">
         Para tornar o modelo mais robusto, peso e altura foram retirados do treinamento.
-        Portanto, a análise enfatiza fatores de comportamento e estilo de vida.
-        """
+        Portanto, a análise enfatiza fatores comportamentais e de estilo de vida.
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
     # KPIs
@@ -401,11 +512,20 @@ elif pagina == "Dashboard Analítico":
 
     k1, k2, k3, k4, k5 = st.columns(5)
 
-    k1.metric("Pacientes", f"{total_pacientes:,}".replace(",", "."))
-    k2.metric("Obesidade", f"{obesos:.1f}%")
-    k3.metric("Sobrepeso", f"{sobrepeso:.1f}%")
-    k4.metric("Peso normal", f"{peso_normal:.1f}%")
-    k5.metric("Acurácia", f"{acuracia:.1%}")
+    with k1:
+        card_kpi("Pacientes", f"{total_pacientes:,}".replace(",", "."))
+
+    with k2:
+        card_kpi("Obesidade", f"{obesos:.1f}%")
+
+    with k3:
+        card_kpi("Sobrepeso", f"{sobrepeso:.1f}%")
+
+    with k4:
+        card_kpi("Peso Normal", f"{peso_normal:.1f}%")
+
+    with k5:
+        card_kpi("Acurácia RF", f"{acuracia:.1%}")
 
     st.divider()
 
@@ -426,7 +546,8 @@ elif pagina == "Dashboard Analítico":
         fig_bar.update_layout(
             showlegend=False,
             xaxis_title="",
-            yaxis_title="Quantidade de pacientes"
+            yaxis_title="Quantidade de pacientes",
+            title_font_size=20
         )
         st.plotly_chart(fig_bar, use_container_width=True)
 
@@ -436,8 +557,9 @@ elif pagina == "Dashboard Analítico":
             names="Nível de obesidade",
             values="Quantidade",
             title="Proporção das Classes",
-            hole=0.5
+            hole=0.55
         )
+        fig_pie.update_layout(title_font_size=20)
         st.plotly_chart(fig_pie, use_container_width=True)
 
     st.divider()
@@ -466,23 +588,26 @@ elif pagina == "Dashboard Analítico":
 
     fig_hist.update_layout(
         xaxis_title="",
-        yaxis_title="% dentro de cada nível"
+        yaxis_title="% dentro de cada nível",
+        title_font_size=20
     )
 
     st.plotly_chart(fig_hist, use_container_width=True)
 
     st.markdown(
         """
-        **Insight:** O histórico familiar é uma variável importante para identificar maior predisposição
-        aos níveis de sobrepeso e obesidade.
-        """
+        <div class="model-card">
+        <b>Insight:</b> o histórico familiar aparece como um dos fatores relevantes para identificar predisposição
+        a níveis mais elevados de sobrepeso e obesidade.
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
     st.divider()
 
     col3, col4 = st.columns(2)
 
-    # Atividade física
     with col3:
         fig_faf = px.box(
             df_dash,
@@ -494,11 +619,11 @@ elif pagina == "Dashboard Analítico":
         fig_faf.update_layout(
             showlegend=False,
             xaxis_title="",
-            yaxis_title="Frequência de atividade física"
+            yaxis_title="Frequência de atividade física",
+            title_font_size=20
         )
         st.plotly_chart(fig_faf, use_container_width=True)
 
-    # Água
     with col4:
         fig_ch2o = px.box(
             df_dash,
@@ -510,7 +635,8 @@ elif pagina == "Dashboard Analítico":
         fig_ch2o.update_layout(
             showlegend=False,
             xaxis_title="",
-            yaxis_title="Consumo diário de água"
+            yaxis_title="Consumo diário de água",
+            title_font_size=20
         )
         st.plotly_chart(fig_ch2o, use_container_width=True)
 
@@ -518,7 +644,6 @@ elif pagina == "Dashboard Analítico":
 
     col5, col6 = st.columns(2)
 
-    # Alimentos calóricos
     favc = pd.crosstab(
         df_dash["Obesity_PT"],
         df_dash["FAVC_PT"],
@@ -542,11 +667,11 @@ elif pagina == "Dashboard Analítico":
         )
         fig_favc.update_layout(
             xaxis_title="",
-            yaxis_title="% dentro de cada nível"
+            yaxis_title="% dentro de cada nível",
+            title_font_size=20
         )
         st.plotly_chart(fig_favc, use_container_width=True)
 
-    # Transporte
     mtrans = pd.crosstab(
         df_dash["Obesity_PT"],
         df_dash["MTRANS_PT"],
@@ -570,18 +695,17 @@ elif pagina == "Dashboard Analítico":
         )
         fig_mtrans.update_layout(
             xaxis_title="",
-            yaxis_title="% dentro de cada nível"
+            yaxis_title="% dentro de cada nível",
+            title_font_size=20
         )
         st.plotly_chart(fig_mtrans, use_container_width=True)
 
     st.divider()
 
-    # Importância das variáveis
-    st.subheader("Importância das Variáveis no Modelo")
+    st.markdown('<div class="section-title">Importância das Variáveis no Modelo</div>', unsafe_allow_html=True)
 
     df_imp = obter_importancia_features(modelo, X_modelo).head(15)
 
-    # Tradução parcial de nomes principais
     traducoes_features = {
         "Age": "Idade",
         "FCVC": "Consumo de vegetais",
@@ -629,22 +753,27 @@ elif pagina == "Dashboard Analítico":
         title="Top 15 Variáveis Mais Importantes"
     )
 
+    fig_imp.update_layout(title_font_size=20)
+
     st.plotly_chart(fig_imp, use_container_width=True)
 
     st.divider()
 
-    st.subheader("Conclusão Executiva")
+    st.markdown('<div class="section-title">Conclusão Executiva</div>', unsafe_allow_html=True)
 
-    st.success(
+    st.markdown(
         """
+        <div class="success-box">
         A análise indica que fatores como histórico familiar, hábitos alimentares,
         frequência de atividade física, consumo de água, uso de tecnologia e meio de transporte
         contribuem para a identificação dos diferentes níveis de obesidade.
-
+        <br><br>
         Como peso e altura foram removidos do modelo, a solução se torna mais útil como ferramenta
         de triagem baseada em comportamento e estilo de vida, apoiando a equipe médica na identificação
         de padrões de risco.
-        """
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
 
@@ -654,9 +783,18 @@ elif pagina == "Dashboard Analítico":
 
 else:
 
-    st.title("📘 Sobre o Projeto")
+    st.markdown('<div class="main-title">📘 Sobre o Projeto</div>', unsafe_allow_html=True)
 
-    st.header("Objetivo")
+    st.markdown(
+        """
+        <div class="subtitle">
+        Resumo metodológico da solução de Machine Learning desenvolvida para o Tech Challenge.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.markdown('<div class="section-title">Objetivo</div>', unsafe_allow_html=True)
 
     st.write(
         """
@@ -665,52 +803,70 @@ else:
         """
     )
 
-    st.header("Pipeline de Machine Learning")
+    st.markdown('<div class="section-title">Pipeline de Machine Learning</div>', unsafe_allow_html=True)
 
-    st.write(
+    st.markdown(
         """
+        <div class="model-card">
         A pipeline desenvolvida inclui:
-
-        1. Leitura e entendimento da base de dados;
-        2. Análise exploratória dos dados;
-        3. Remoção de duplicatas;
-        4. Remoção de variáveis com risco de data leakage;
-        5. Pré-processamento de variáveis numéricas e categóricas;
-        6. Treinamento e comparação de modelos de classificação;
-        7. Avaliação com acurácia, validação cruzada e matriz de confusão;
-        8. Implantação do modelo em aplicação Streamlit.
-        """
+        <br><br>
+        <b>1.</b> Leitura e entendimento da base de dados;<br>
+        <b>2.</b> Análise exploratória dos dados;<br>
+        <b>3.</b> Remoção de duplicatas;<br>
+        <b>4.</b> Remoção de variáveis com risco de data leakage;<br>
+        <b>5.</b> Pré-processamento de variáveis numéricas e categóricas;<br>
+        <b>6.</b> Treinamento e comparação de modelos de classificação;<br>
+        <b>7.</b> Avaliação com acurácia, validação cruzada e matriz de confusão;<br>
+        <b>8.</b> Implantação do modelo em aplicação Streamlit.
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    st.header("Prevenção de Data Leakage")
+    st.markdown('<div class="section-title">Prevenção de Data Leakage</div>', unsafe_allow_html=True)
 
-    st.write(
+    st.markdown(
         """
-        As variáveis `Weight` e `Height` foram removidas do modelo final, pois o nível de obesidade
+        <div class="info-box">
+        As variáveis <b>Weight</b> e <b>Height</b> foram removidas do modelo final, pois o nível de obesidade
         pode estar diretamente relacionado ao IMC, que utiliza peso e altura em seu cálculo.
-
+        <br><br>
         Com essa decisão, o modelo passa a utilizar fatores comportamentais e de estilo de vida,
         tornando a solução mais robusta e mais útil como ferramenta de apoio à triagem.
-        """
+        </div>
+        """,
+        unsafe_allow_html=True
     )
 
-    st.header("Modelo Utilizado")
+    st.markdown('<div class="section-title">Modelo Utilizado</div>', unsafe_allow_html=True)
+
+    c1, c2, c3 = st.columns(3)
+
+    with c1:
+        card_kpi("Modelo", "Random Forest")
+
+    with c2:
+        card_kpi("Acurácia", f"{acuracia:.1%}")
+
+    with c3:
+        card_kpi("Objetivo", "Triagem")
 
     st.write(
-        f"""
+        """
         O modelo final utilizado foi um **Random Forest Classifier ajustado** para reduzir o risco
-        de overfitting.
-
-        Acurácia obtida no conjunto de teste: **{acuracia:.2%}**
+        de overfitting. A escolha priorizou equilíbrio entre desempenho e capacidade de generalização.
         """
     )
 
-    st.header("Limitações")
+    st.markdown('<div class="section-title">Limitações</div>', unsafe_allow_html=True)
 
-    st.write(
+    st.markdown(
         """
+        <div class="info-box">
         Esta aplicação não deve ser utilizada como diagnóstico médico definitivo.
         O resultado gerado pelo modelo deve ser interpretado como apoio à decisão,
         sendo necessária a avaliação clínica de profissionais de saúde.
-        """
+        </div>
+        """,
+        unsafe_allow_html=True
     )
