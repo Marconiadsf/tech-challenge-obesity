@@ -75,8 +75,8 @@ traducao_transporte = {
 @st.cache_resource
 def treinar_modelo():
     df = pd.read_csv("Obesity.csv")
-    
-# Remover duplicatas para manter consistência com o notebook
+
+    # Remover duplicatas para manter consistência com o notebook
     df = df.drop_duplicates().reset_index(drop=True)
 
     # Remoção de Weight e Height para reduzir risco de data leakage
@@ -85,7 +85,7 @@ def treinar_modelo():
 
     categorical_cols = X.select_dtypes(include=["object"]).columns
     numeric_cols = X.select_dtypes(include=["int64", "float64"]).columns
-    
+
     preprocessor = ColumnTransformer(
         transformers=[
             ("num", StandardScaler(), numeric_cols),
@@ -126,6 +126,10 @@ def treinar_modelo():
 @st.cache_data
 def carregar_dados_dashboard():
     df = pd.read_csv("Obesity.csv")
+
+    # Remover duplicatas para manter consistência com o notebook
+    df = df.drop_duplicates().reset_index(drop=True)
+
     df["Obesity_PT"] = df["Obesity"].map(traducao_obesidade)
     df["Gender_PT"] = df["Gender"].map(traducao_genero)
     df["family_history_PT"] = df["family_history"].map(traducao_sim_nao)
@@ -135,6 +139,7 @@ def carregar_dados_dashboard():
     df["CAEC_PT"] = df["CAEC"].map(traducao_caec)
     df["CALC_PT"] = df["CALC"].map(traducao_alcool)
     df["MTRANS_PT"] = df["MTRANS"].map(traducao_transporte)
+
     return df
 
 
@@ -172,12 +177,14 @@ def obter_importancia_features(modelo, X):
 # ======================================================
 
 st.sidebar.title("Navegação")
+
 pagina = st.sidebar.radio(
     "Escolha uma página:",
     ["Predição", "Dashboard Analítico", "Sobre o Projeto"]
 )
 
 st.sidebar.divider()
+
 st.sidebar.info(
     "Tech Challenge - Fase 4\n\n"
     "Modelo preditivo para apoio à análise do nível de obesidade."
@@ -224,21 +231,59 @@ if pagina == "Predição":
         favc_pt = st.selectbox("Consome alimentos altamente calóricos com frequência?", ["Sim", "Não"])
 
     with col2:
-        fcvc = st.slider("Frequência de consumo de vegetais", min_value=1.0, max_value=3.0, value=2.0, step=0.1)
-        ncp = st.slider("Número de refeições principais por dia", min_value=1.0, max_value=4.0, value=3.0, step=0.1)
+        fcvc = st.slider(
+            "Frequência de consumo de vegetais",
+            min_value=1.0,
+            max_value=3.0,
+            value=2.0,
+            step=0.1
+        )
+
+        ncp = st.slider(
+            "Número de refeições principais por dia",
+            min_value=1.0,
+            max_value=4.0,
+            value=3.0,
+            step=0.1
+        )
+
         caec_pt = st.selectbox("Come entre as refeições?", ["Não", "Às vezes", "Frequentemente", "Sempre"])
         smoke_pt = st.selectbox("Fuma?", ["Sim", "Não"])
 
     with col3:
-        ch2o = st.slider("Consumo diário de água", min_value=1.0, max_value=3.0, value=2.0, step=0.1)
+        ch2o = st.slider(
+            "Consumo diário de água",
+            min_value=1.0,
+            max_value=3.0,
+            value=2.0,
+            step=0.1
+        )
+
         scc_pt = st.selectbox("Monitora calorias ingeridas?", ["Sim", "Não"])
-        faf = st.slider("Frequência de atividade física", min_value=0.0, max_value=3.0, value=1.0, step=0.1)
-        tue = st.slider("Tempo usando dispositivos tecnológicos", min_value=0.0, max_value=2.0, value=1.0, step=0.1)
+
+        faf = st.slider(
+            "Frequência de atividade física",
+            min_value=0.0,
+            max_value=3.0,
+            value=1.0,
+            step=0.1
+        )
+
+        tue = st.slider(
+            "Tempo usando dispositivos tecnológicos",
+            min_value=0.0,
+            max_value=2.0,
+            value=1.0,
+            step=0.1
+        )
 
     col4, col5 = st.columns(2)
 
     with col4:
-        calc_pt = st.selectbox("Frequência de consumo de álcool", ["Não consome", "Às vezes", "Frequentemente", "Sempre"])
+        calc_pt = st.selectbox(
+            "Frequência de consumo de álcool",
+            ["Não consome", "Às vezes", "Frequentemente", "Sempre"]
+        )
 
     with col5:
         mtrans_pt = st.selectbox(
@@ -378,7 +423,11 @@ elif pagina == "Dashboard Analítico":
             color="Nível de obesidade",
             title="Distribuição dos Níveis de Obesidade"
         )
-        fig_bar.update_layout(showlegend=False, xaxis_title="", yaxis_title="Quantidade de pacientes")
+        fig_bar.update_layout(
+            showlegend=False,
+            xaxis_title="",
+            yaxis_title="Quantidade de pacientes"
+        )
         st.plotly_chart(fig_bar, use_container_width=True)
 
     with col2:
@@ -414,7 +463,12 @@ elif pagina == "Dashboard Analítico":
         title="Histórico Familiar × Nível de Obesidade",
         barmode="stack"
     )
-    fig_hist.update_layout(xaxis_title="", yaxis_title="% dentro de cada nível")
+
+    fig_hist.update_layout(
+        xaxis_title="",
+        yaxis_title="% dentro de cada nível"
+    )
+
     st.plotly_chart(fig_hist, use_container_width=True)
 
     st.markdown(
@@ -437,7 +491,11 @@ elif pagina == "Dashboard Analítico":
             color="Obesity_PT",
             title="Atividade Física × Nível de Obesidade"
         )
-        fig_faf.update_layout(showlegend=False, xaxis_title="", yaxis_title="Frequência de atividade física")
+        fig_faf.update_layout(
+            showlegend=False,
+            xaxis_title="",
+            yaxis_title="Frequência de atividade física"
+        )
         st.plotly_chart(fig_faf, use_container_width=True)
 
     # Água
@@ -449,7 +507,11 @@ elif pagina == "Dashboard Analítico":
             color="Obesity_PT",
             title="Consumo de Água × Nível de Obesidade"
         )
-        fig_ch2o.update_layout(showlegend=False, xaxis_title="", yaxis_title="Consumo diário de água")
+        fig_ch2o.update_layout(
+            showlegend=False,
+            xaxis_title="",
+            yaxis_title="Consumo diário de água"
+        )
         st.plotly_chart(fig_ch2o, use_container_width=True)
 
     st.divider()
@@ -478,7 +540,10 @@ elif pagina == "Dashboard Analítico":
             title="Alimentos Calóricos × Nível de Obesidade",
             barmode="stack"
         )
-        fig_favc.update_layout(xaxis_title="", yaxis_title="% dentro de cada nível")
+        fig_favc.update_layout(
+            xaxis_title="",
+            yaxis_title="% dentro de cada nível"
+        )
         st.plotly_chart(fig_favc, use_container_width=True)
 
     # Transporte
@@ -503,7 +568,10 @@ elif pagina == "Dashboard Analítico":
             title="Meio de Transporte × Nível de Obesidade",
             barmode="stack"
         )
-        fig_mtrans.update_layout(xaxis_title="", yaxis_title="% dentro de cada nível")
+        fig_mtrans.update_layout(
+            xaxis_title="",
+            yaxis_title="% dentro de cada nível"
+        )
         st.plotly_chart(fig_mtrans, use_container_width=True)
 
     st.divider()
@@ -534,6 +602,7 @@ elif pagina == "Dashboard Analítico":
     def traduzir_feature(nome):
         for chave, valor in traducoes_features.items():
             nome = nome.replace(chave, valor)
+
         nome = nome.replace("_yes", " = Sim")
         nome = nome.replace("_no", " = Não")
         nome = nome.replace("_Female", " = Feminino")
@@ -546,6 +615,7 @@ elif pagina == "Dashboard Analítico":
         nome = nome.replace("_Automobile", " = Automóvel")
         nome = nome.replace("_Motorbike", " = Moto")
         nome = nome.replace("_Bike", " = Bicicleta")
+
         return nome
 
     df_imp["Variável"] = df_imp["Variável"].apply(traduzir_feature)
@@ -558,6 +628,7 @@ elif pagina == "Dashboard Analítico":
         color="Importância",
         title="Top 15 Variáveis Mais Importantes"
     )
+
     st.plotly_chart(fig_imp, use_container_width=True)
 
     st.divider()
@@ -602,11 +673,12 @@ else:
 
         1. Leitura e entendimento da base de dados;
         2. Análise exploratória dos dados;
-        3. Remoção de variáveis com risco de data leakage;
-        4. Pré-processamento de variáveis numéricas e categóricas;
-        5. Treinamento de modelos de classificação;
-        6. Avaliação com acurácia, validação cruzada e matriz de confusão;
-        7. Implantação do modelo em aplicação Streamlit.
+        3. Remoção de duplicatas;
+        4. Remoção de variáveis com risco de data leakage;
+        5. Pré-processamento de variáveis numéricas e categóricas;
+        6. Treinamento e comparação de modelos de classificação;
+        7. Avaliação com acurácia, validação cruzada e matriz de confusão;
+        8. Implantação do modelo em aplicação Streamlit.
         """
     )
 
@@ -626,7 +698,7 @@ else:
 
     st.write(
         f"""
-        O modelo final utilizado foi um **Random Forest Classifier** ajustado para reduzir o risco
+        O modelo final utilizado foi um **Random Forest Classifier ajustado** para reduzir o risco
         de overfitting.
 
         Acurácia obtida no conjunto de teste: **{acuracia:.2%}**
