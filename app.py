@@ -1,6 +1,12 @@
 import streamlit as st
 import pandas as pd
-import joblib
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 
 st.set_page_config(
     page_title="Sistema Preditivo de Obesidade",
@@ -9,12 +15,53 @@ st.set_page_config(
 )
 
 @st.cache_resource
-def carregar_modelo():
-    modelo = joblib.load("modelo_obesidade.pkl")
-    colunas_modelo = joblib.load("colunas_modelo.pkl")
-    return modelo, colunas_modelo
+def treinar_modelo():
+    df = pd.read_csv("Obesity.csv")
 
-modelo, colunas_modelo = carregar_modelo()
+    # Remoção de Weight e Height para reduzir risco de data leakage
+    X = df.drop(columns=["Obesity", "Weight", "Height"])
+    y = df["Obesity"]
+
+    categorical_cols = X.select_dtypes(include=["object"]).columns
+    numeric_cols = X.select_dtypes(include=["int64", "float64"]).columns
+
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ("num", StandardScaler(), numeric_cols),
+            ("cat", OneHotEncoder(handle_unknown="ignore"), categorical_cols)
+        ]
+    )
+
+    modelo = Pipeline(
+        steps=[
+            ("preprocessor", preprocessor),
+            ("classifier", RandomForestClassifier(
+                n_estimators=200,
+                max_depth=8,
+                min_samples_split=5,
+                min_samples_leaf=2,
+                random_state=42
+            ))
+        ]
+    )
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X,
+        y,
+        test_size=0.2,
+        random_state=42,
+        stratify=y
+    )
+
+    modelo.fit(X_train, y_train)
+
+    y_pred = modelo.predict(X_test)
+    acuracia = accuracy_score(y_test, y_pred)
+
+    return modelo, list(X.columns), acuracia
+
+
+modelo, colunas_modelo, acuracia = treinar_modelo()
 
 st.title("Sistema Preditivo de Nível de Obesidade")
 
@@ -29,11 +76,13 @@ st.write(
 st.warning(
     """
     Este sistema é uma ferramenta de apoio à decisão e não substitui avaliação médica profissional.
-    
-    As variáveis peso e altura foram removidas do modelo para reduzir risco de data leakage,
+
+    As variáveis Weight e Height foram removidas do modelo para reduzir risco de data leakage,
     já que o nível de obesidade pode estar diretamente relacionado ao IMC.
     """
 )
+
+st.metric("Acurácia do modelo", f"{acuracia:.2%}")
 
 st.header("Dados do paciente")
 
@@ -116,7 +165,7 @@ st.write(
     """
     O modelo foi treinado com a base Obesity.csv utilizando uma pipeline de Machine Learning
     com pré-processamento de variáveis numéricas e categóricas.
-    
+
     Para tornar a solução mais robusta, as variáveis Weight e Height foram removidas do modelo final,
     reduzindo o risco de data leakage. Dessa forma, a previsão se baseia principalmente em fatores
     comportamentais, histórico familiar e estilo de vida.
