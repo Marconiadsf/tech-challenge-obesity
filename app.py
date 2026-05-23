@@ -17,16 +17,22 @@ def carregar_modelo():
 modelo, colunas_modelo = carregar_modelo()
 
 st.title("Sistema Preditivo de Nível de Obesidade")
+
 st.write(
     """
     Esta aplicação utiliza Machine Learning para auxiliar a equipe médica
-    na previsão do nível de obesidade de um paciente com base em dados físicos,
-    hábitos alimentares, histórico familiar e estilo de vida.
+    na previsão do nível de obesidade de um paciente com base em hábitos alimentares,
+    histórico familiar, atividade física e estilo de vida.
     """
 )
 
 st.warning(
-    "Este sistema é uma ferramenta de apoio à decisão e não substitui avaliação médica profissional."
+    """
+    Este sistema é uma ferramenta de apoio à decisão e não substitui avaliação médica profissional.
+    
+    As variáveis peso e altura foram removidas do modelo para reduzir risco de data leakage,
+    já que o nível de obesidade pode estar diretamente relacionado ao IMC.
+    """
 )
 
 st.header("Dados do paciente")
@@ -36,42 +42,35 @@ col1, col2, col3 = st.columns(3)
 with col1:
     gender = st.selectbox("Gênero", ["Female", "Male"])
     age = st.number_input("Idade", min_value=1, max_value=100, value=25)
-    height = st.number_input("Altura em metros", min_value=1.00, max_value=2.50, value=1.70, step=0.01)
-    weight = st.number_input("Peso em kg", min_value=20.0, max_value=250.0, value=70.0, step=0.1)
-
-with col2:
     family_history = st.selectbox("Histórico familiar de sobrepeso?", ["yes", "no"])
     favc = st.selectbox("Consome alimentos altamente calóricos com frequência?", ["yes", "no"])
+
+with col2:
     fcvc = st.slider("Frequência de consumo de vegetais", min_value=1.0, max_value=3.0, value=2.0, step=0.1)
     ncp = st.slider("Número de refeições principais por dia", min_value=1.0, max_value=4.0, value=3.0, step=0.1)
-
-with col3:
     caec = st.selectbox("Come entre as refeições?", ["no", "Sometimes", "Frequently", "Always"])
     smoke = st.selectbox("Fuma?", ["yes", "no"])
+
+with col3:
     ch2o = st.slider("Consumo diário de água", min_value=1.0, max_value=3.0, value=2.0, step=0.1)
     scc = st.selectbox("Monitora calorias ingeridas?", ["yes", "no"])
-
-col4, col5, col6 = st.columns(3)
-
-with col4:
     faf = st.slider("Frequência de atividade física", min_value=0.0, max_value=3.0, value=1.0, step=0.1)
-
-with col5:
     tue = st.slider("Tempo usando dispositivos tecnológicos", min_value=0.0, max_value=2.0, value=1.0, step=0.1)
 
-with col6:
+col4, col5 = st.columns(2)
+
+with col4:
     calc = st.selectbox("Frequência de consumo de álcool", ["no", "Sometimes", "Frequently", "Always"])
+
+with col5:
     mtrans = st.selectbox(
         "Meio de transporte principal",
         ["Public_Transportation", "Walking", "Automobile", "Motorbike", "Bike"]
     )
 
-# DataFrame usado pelo modelo
 dados_paciente = pd.DataFrame({
     "Gender": [gender],
     "Age": [age],
-    "Height": [height],
-    "Weight": [weight],
     "family_history": [family_history],
     "FAVC": [favc],
     "FCVC": [fcvc],
@@ -86,7 +85,6 @@ dados_paciente = pd.DataFrame({
     "MTRANS": [mtrans]
 })
 
-# Garantir mesma ordem das colunas usadas no treino
 dados_paciente = dados_paciente[colunas_modelo]
 
 st.divider()
@@ -113,10 +111,14 @@ if st.button("Prever nível de obesidade"):
 st.divider()
 
 st.subheader("Sobre o modelo")
+
 st.write(
     """
-    O modelo foi treinado com a base Obesity.csv. A pipeline inclui pré-processamento
-    de variáveis numéricas e categóricas, além de um classificador Random Forest
-    ajustado para reduzir risco de overfitting.
+    O modelo foi treinado com a base Obesity.csv utilizando uma pipeline de Machine Learning
+    com pré-processamento de variáveis numéricas e categóricas.
+    
+    Para tornar a solução mais robusta, as variáveis Weight e Height foram removidas do modelo final,
+    reduzindo o risco de data leakage. Dessa forma, a previsão se baseia principalmente em fatores
+    comportamentais, histórico familiar e estilo de vida.
     """
 )
