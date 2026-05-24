@@ -78,7 +78,7 @@ traducoes_features   = {
 # accuracy_test, feature_names, n_samples e df_dashboard.
 # Nenhum arquivo externo é lido além deste pkl.
 
-MODEL_PATH = Path(__file__).parent.parent / "model" / "model_pipeline.pkl"
+MODEL_PATH = "model_pipeline.pkl"
 
 @st.cache_resource
 def carregar_artefatos():
