@@ -106,7 +106,7 @@ colunas_modelo = feature_names
 # O modelo não é retreinado — vem inteiramente do pkl.
 # ======================================================
 
-DATA_PATH = Path(__file__).parent.parent / "data" / "obesity.csv"
+DATA_PATH = "obesity.csv"
 
 @st.cache_data
 def carregar_dashboard():
