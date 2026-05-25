@@ -80,7 +80,7 @@ st.markdown("""
 # ======================================================
 
 traducao_obesidade = {
-    "Insufficient_Weight": "Peso Insuficiente",
+    "Insufficient_Weight": "Abaixo do Peso",
     "Normal_Weight":        "Peso Normal",
     "Overweight_Level_I":   "Sobrepeso Nível I",
     "Overweight_Level_II":  "Sobrepeso Nível II",
@@ -350,29 +350,60 @@ if pagina == "Predição":
         # Gráfico + formulário de comparação lado a lado
         col_chart, col_form = st.columns([1.3, 1])
 
-        with col_chart:
+with col_chart:
+            # 1. Ordem clínica correta utilizando o novo termo
+            ordem_clinica = [
+                "Abaixo do Peso",
+                "Peso Normal",
+                "Sobrepeso Nível I",
+                "Sobrepeso Nível II",
+                "Obesidade Tipo I",
+                "Obesidade Tipo II",
+                "Obesidade Tipo III"
+            ]
+
+            # 2. Mapeamento de cores correspondente
+            mapa_cores = {
+                "Abaixo do Peso":      "#3b82f6",  # Azul
+                "Peso Normal":        "#22c55e",  # Verde
+                "Sobrepeso Nível I":   "#eab308",  # Amarelo
+                "Sobrepeso Nível II":  "#f97316",  # Laranja
+                "Obesidade Tipo I":    "#ef4444",  # Vermelho claro
+                "Obesidade Tipo II":   "#dc2626",  # Vermelho
+                "Obesidade Tipo III":  "#991b1b"   # Vermelho escuro / Roxo
+            }
+
             classes = label_encoder.classes_
             df_prob = pd.DataFrame({
                 "Classe":        [traducao_obesidade.get(c, c) for c in classes],
                 "Probabilidade": pred_prob,
-            }).sort_values("Probabilidade", ascending=False)
+            })
+            
+            # 3. Força a coluna a ser categórica respeitando a ordem sequencial biológica
+            df_prob["Classe"] = pd.Categorical(df_prob["Classe"], categories=ordem_clinica, ordered=True)
+            df_prob = df_prob.sort_values("Classe")
 
+            # 4. Gera o gráfico único, ordenado e com cores semânticas fixas
             fig_prob = px.bar(
                 df_prob,
                 x="Classe",
                 y="Probabilidade",
                 color="Classe",
+                color_discrete_map=mapa_cores,
                 title="Probabilidade estimada por classe",
                 text=df_prob["Probabilidade"].apply(lambda x: f"{x*100:.1f}%")
             )
+            
             fig_prob.update_traces(width=0.7, textposition="outside")
             fig_prob.update_layout(
                 showlegend=False,
                 bargap=0.2,
                 height=450,
                 title_font_size=18,
-                yaxis_tickformat=".0%"
+                yaxis_tickformat=".0%",
+                xaxis_title=""
             )
+            
             st.plotly_chart(fig_prob, use_container_width=True)
 
         with col_form:
@@ -496,8 +527,8 @@ elif pagina == "Dashboard Analítico":
     st.markdown('<div class="subtitle">Insights sobre a distribuição dos níveis de obesidade e fatores '
                 'associados ao comportamento, histórico familiar e estilo de vida dos pacientes.</div>',
                 unsafe_allow_html=True)
-    st.markdown('<div class="info-box">Para tornar o modelo mais robusto, peso e altura foram retirados '
-                'do treinamento. Portanto, a análise enfatiza fatores comportamentais e de estilo de vida.</div>',
+    st.markdown('<div class="info-box">Peso e altura foram retirados para evitar dataleakage.'
+                'A análise enfatiza fatores comportamentais e de estilo de vida.</div>',
                 unsafe_allow_html=True)
 
     # KPIs
