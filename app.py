@@ -75,10 +75,9 @@ traducoes_features   = {
 # ======================================================
 # O pkl contém todos os artefatos gerados pelo notebook:
 # pipeline, label_encoder, target_classes, model_name,
-# accuracy_test, feature_names, n_samples e df_dashboard.
-# Nenhum arquivo externo é lido além deste pkl.
+# accuracy_test, feature_names e n_samples.
 
-MODEL_PATH = "model_pipeline.pkl"
+MODEL_PATH = Path(__file__).parent / "model_pipeline.pkl"
 
 @st.cache_resource
 def carregar_artefatos():
@@ -106,7 +105,7 @@ colunas_modelo = feature_names
 # O modelo não é retreinado — vem inteiramente do pkl.
 # ======================================================
 
-DATA_PATH = "obesity.csv"
+DATA_PATH = Path(__file__).parent / "obesity.csv"
 
 @st.cache_data
 def carregar_dashboard():
@@ -195,38 +194,97 @@ if pagina == "Predição":
     st.markdown('<div class="section-title">Dados do Paciente</div>', unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns(3)
+
     with col1:
-        gender_pt        = st.selectbox("Gênero", ["Feminino", "Masculino"])
-        age              = st.number_input("Idade", min_value=1, max_value=100, value=25)
-        family_history_pt= st.selectbox("Histórico familiar de sobrepeso?", ["Sim", "Não"])
-        favc_pt          = st.selectbox("Consome alimentos altamente calóricos com frequência?", ["Sim", "Não"])
+        gender_pt = st.selectbox("Gênero", ["Feminino", "Masculino"])
+        age = st.number_input("Idade", min_value=1, max_value=100, value=25)
+        family_history_pt = st.selectbox(
+            "Histórico familiar de sobrepeso?",
+            ["Sim", "Não"],
+            help="Algum familiar (pais, irmãos) tem ou teve sobrepeso ou obesidade?"
+        )
+        favc_pt = st.selectbox(
+            "Consome alimentos altamente calóricos com frequência? (FAVC)",
+            ["Sim", "Não"],
+            help="Alimentos como fast food, frituras e doces industrializados."
+        )
+
     with col2:
-        fcvc  = st.slider("Frequência de consumo de vegetais", 1.0, 3.0, 2.0, 0.1)
-        ncp   = st.slider("Número de refeições principais por dia", 1.0, 4.0, 3.0, 0.1)
-        caec_pt = st.selectbox("Come entre as refeições?", ["Não", "Às vezes", "Frequentemente", "Sempre"])
-        smoke_pt= st.selectbox("Fuma?", ["Sim", "Não"])
+        fcvc_pt = st.selectbox(
+            "Frequência de consumo de vegetais (FCVC)",
+            ["Raramente", "Às vezes", "Sempre"],
+            index=1,
+            help="Com que frequência inclui vegetais nas refeições? Raramente = quase nunca · Às vezes = algumas refeições · Sempre = na maioria das refeições."
+        )
+        ncp_pt = st.selectbox(
+            "Número de refeições principais por dia (NCP)",
+            ["1 refeição", "2 refeições", "3 refeições", "4 ou mais refeições"],
+            index=2,
+            help="Conte apenas refeições principais (café da manhã, almoço, jantar). Lanches contam na próxima pergunta."
+        )
+        caec_pt = st.selectbox(
+            "Come entre as refeições? (CAEC)",
+            ["Não", "Às vezes", "Frequentemente", "Sempre"],
+            help="Com que frequência faz lanches ou petiscos fora das refeições principais?"
+        )
+        smoke_pt = st.selectbox("Fuma? (SMOKE)", ["Não", "Sim"])
+
     with col3:
-        ch2o  = st.slider("Consumo diário de água", 1.0, 3.0, 2.0, 0.1)
-        scc_pt= st.selectbox("Monitora calorias ingeridas?", ["Sim", "Não"])
-        faf   = st.slider("Frequência de atividade física", 0.0, 3.0, 1.0, 0.1)
-        tue   = st.slider("Tempo usando dispositivos tecnológicos", 0.0, 2.0, 1.0, 0.1)
+        ch2o_pt = st.selectbox(
+            "Consumo diário de água (CH2O)",
+            ["Menos de 1 litro", "Entre 1 e 2 litros", "Mais de 2 litros"],
+            index=1,
+            help="Considere toda a água ingerida ao longo do dia, incluindo chás e sucos naturais."
+        )
+        scc_pt = st.selectbox(
+            "Monitora calorias ingeridas? (SCC)",
+            ["Não", "Sim"],
+            help="Usa aplicativo, diário ou outro método para acompanhar a ingestão calórica?"
+        )
+        faf_pt = st.selectbox(
+            "Frequência de atividade física por semana (FAF)",
+            ["Nenhuma", "1 a 2 dias", "3 a 4 dias", "4 a 5 dias"],
+            index=1,
+            help="Atividade física moderada ou intensa: caminhada rápida, academia, esporte, etc."
+        )
+        tue_pt = st.selectbox(
+            "Tempo diário em dispositivos tecnológicos (TUE)",
+            ["0 a 2 horas", "3 a 5 horas", "Mais de 5 horas"],
+            index=1,
+            help="Tempo de tela fora do trabalho: celular, TV, computador, videogame, etc."
+        )
 
     col4, col5 = st.columns(2)
     with col4:
-        calc_pt  = st.selectbox("Frequência de consumo de álcool",
-                                ["Não consome", "Às vezes", "Frequentemente", "Sempre"])
+        calc_pt = st.selectbox(
+            "Frequência de consumo de álcool (CALC)",
+            ["Não consome", "Às vezes", "Frequentemente", "Sempre"],
+            help="Com que frequência consome bebidas alcoólicas?"
+        )
     with col5:
-        mtrans_pt= st.selectbox("Meio de transporte principal",
-                                ["Transporte Público", "Caminhada", "Automóvel", "Moto", "Bicicleta"])
+        mtrans_pt = st.selectbox(
+            "Meio de transporte principal (MTRANS)",
+            ["Transporte Público", "Caminhada", "Automóvel", "Moto", "Bicicleta"],
+            help="Qual o meio de transporte mais usado no dia a dia?"
+        )
 
-    gender         = {"Feminino": "Female",  "Masculino": "Male"}[gender_pt]
+    gender         = {"Feminino": "Female", "Masculino": "Male"}[gender_pt]
     family_history = {"Sim": "yes", "Não": "no"}[family_history_pt]
     favc           = {"Sim": "yes", "Não": "no"}[favc_pt]
-    smoke          = {"Sim": "yes", "Não": "no"}[smoke_pt]
-    scc            = {"Sim": "yes", "Não": "no"}[scc_pt]
+    smoke          = {"Não": "no", "Sim": "yes"}[smoke_pt]
+    scc            = {"Não": "no", "Sim": "yes"}[scc_pt]
     caec           = {v: k for k, v in traducao_caec.items()}[caec_pt]
     calc           = {v: k for k, v in traducao_alcool.items()}[calc_pt]
     mtrans         = {v: k for k, v in traducao_transporte.items()}[mtrans_pt]
+
+    # Variáveis ordinais mapeadas para inteiros — consistente com o tratamento do notebook,
+    # que arredonda os valores sintéticos contínuos (ex: FAF=1.673) para o inteiro mais próximo
+    # antes do treino. O app envia os mesmos valores inteiros que o modelo recebeu no treino.
+    fcvc = {"Raramente": 1, "Às vezes": 2, "Sempre": 3}[fcvc_pt]
+    ncp  = {"1 refeição": 1, "2 refeições": 2, "3 refeições": 3, "4 ou mais refeições": 4}[ncp_pt]
+    ch2o = {"Menos de 1 litro": 1, "Entre 1 e 2 litros": 2, "Mais de 2 litros": 3}[ch2o_pt]
+    faf  = {"Nenhuma": 0, "1 a 2 dias": 1, "3 a 4 dias": 2, "4 a 5 dias": 3}[faf_pt]
+    tue  = {"0 a 2 horas": 0, "3 a 5 horas": 1, "Mais de 5 horas": 2}[tue_pt]
 
     dados_paciente = pd.DataFrame([{
         "Gender": gender, "Age": age, "family_history": family_history,
