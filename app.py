@@ -350,7 +350,7 @@ if pagina == "Predição":
         # Gráfico + formulário de comparação lado a lado
         col_chart, col_form = st.columns([1.3, 1])
 
-with col_chart:
+    with col_chart:
             # 1. Ordem clínica correta utilizando o novo termo
             ordem_clinica = [
                 "Abaixo do Peso",
