@@ -21,7 +21,8 @@ Acesse a aplicação no Streamlit:
 
 Alternativamente: 
 🔗 https://tech-challenge-obesity-new2.streamlit.app/ - fork do projeto
-🔗 - alternativa subida via gcp.
+
+🔗 https://tech-challenge-obesity-631788291348.us-central1.run.app - alternativa via GCP(Cloud Run).
 
 ---
 
