@@ -19,6 +19,10 @@ Acesse a aplicação no Streamlit:
 
 🔗 https://tech-challenge-obesity-kiwwtssmdzugnaeastnk29.streamlit.app/
 
+Alternativamente: 
+🔗 https://tech-challenge-obesity-new2.streamlit.app/ - fork do projeto
+🔗 - alternativa subida via gcp.
+
 ---
 
 ## 🎯 Objetivo do Projeto
@@ -107,13 +111,14 @@ A escolha do modelo final levou em consideração não apenas a acurácia, mas t
 
 O modelo final escolhido foi o **Random Forest Ajustado**.
 
-Foram utilizados hiperparâmetros para controlar a complexidade do modelo e reduzir risco de overfitting:
+Os hiperparâmetros foram otimizados com RandomizedSearchCV que alteram os parâmetros
+iniciais do Random Forest para melhorar o modelo:
 
 ```python
 RandomForestClassifier(
-    n_estimators=300,
+    n_estimators=500, # O Tuning aumentou de 300 para 500
     max_depth=10,
-    min_samples_split=10,
+    min_samples_split=2, # O Tuning reduziu de 10 para 2
     min_samples_leaf=4,
     max_features="sqrt",
     random_state=42
@@ -123,12 +128,11 @@ RandomForestClassifier(
 ## ✅ Resultados Obtidos
 
 | Métrica | Resultado |
+| Métrica | Resultado |
 |---|---:|
-| Acurácia no teste | ~79% |
-| Acurácia no treino | ~88% |
-| Gap treino-teste | ~9% |
-| Média da validação cruzada | ~80% |
-| Desvio da validação cruzada | ~1% |
+| Acurácia na Validação Cruzada (K=10) | ~80.5% |
+| Acurácia no Treino (In-sample) | ~88.4% |
+| Gap Treino-Validação (Overfitting proxy) | ~7.9% |
 
 O modelo atende ao requisito mínimo de assertividade acima de 75% e apresenta melhor equilíbrio entre desempenho e generalização quando comparado a modelos mais complexos que apresentaram maior risco de overfitting.
 
@@ -160,16 +164,6 @@ O modelo atende ao requisito mínimo de assertividade acima de 75% e apresenta m
 - Módulo de Feedback Loop: Interface para o médico auditar a predição, selecionar a "Classe Real" confirmada em consulta e salvar o registro diretamente em um banco de dados relacional (PostgreSQL via Supabase).
  - Histórico em Tempo Real: Componente de expansão que consulta o banco de dados via API, exibe os últimos 20 registros avaliados na instituição e permite o download imediato da base atualizada em formato CSV para futuros retreinos do modelo.
  - Segurança da Informação: Credenciais de conexão e chaves de API totalmente blindadas no servidor através do gerenciador de credenciais seguras do Streamlit (st.secrets).
-
----
-
-## 🩺 Prevenção de Data Leakage
-
-As variáveis `Weight` e `Height` foram removidas do modelo final.
-
-Essa decisão foi tomada porque o nível de obesidade pode estar diretamente relacionado ao IMC, que utiliza peso e altura em seu cálculo. Caso essas variáveis fossem utilizadas, o modelo poderia aprender uma relação muito direta com a variável alvo, gerando uma performance artificialmente elevada.
-
-Com essa abordagem, o modelo passa a considerar principalmente fatores comportamentais, histórico familiar e estilo de vida.
 
 ---
 
