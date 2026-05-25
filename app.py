@@ -2,7 +2,41 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import joblib
+from datetime import datetime
 from pathlib import Path
+from supabase import create_client, Client
+
+# ── Cliente Supabase — credenciais lidas de st.secrets ───────────────────────
+# Configurar em Streamlit Cloud > Settings > Secrets:
+#   SUPABASE_URL = "https://xxxx.supabase.co"
+#   SUPABASE_KEY = "eyJ..."
+@st.cache_resource
+def get_supabase_client() -> Client:
+    url = st.secrets["SUPABASE_URL"]
+    key = st.secrets["SUPABASE_KEY"]
+    return create_client(url, key)
+
+# ── Cálculo de classe de obesidade por IMC (referência clínica) ──────────────
+def classificar_por_imc(peso_kg, altura_m):
+    """Retorna a classe de obesidade calculada pelo IMC, no mesmo padrão do dataset."""
+    if altura_m <= 0:
+        return None, None
+    imc = peso_kg / (altura_m ** 2)
+    if imc < 18.5:
+        classe = "Insufficient_Weight"
+    elif imc < 25.0:
+        classe = "Normal_Weight"
+    elif imc < 27.5:
+        classe = "Overweight_Level_I"
+    elif imc < 30.0:
+        classe = "Overweight_Level_II"
+    elif imc < 35.0:
+        classe = "Obesity_Type_I"
+    elif imc < 40.0:
+        classe = "Obesity_Type_II"
+    else:
+        classe = "Obesity_Type_III"
+    return round(imc, 2), classe
 
 # ======================================================
 # Configuração da página
@@ -294,28 +328,162 @@ if pagina == "Predição":
 
     st.divider()
 
+    # Estado da predição persiste fora do botão para o formulário de comparação ficar visível
     if st.button("Prever nível de obesidade"):
         pred_enc   = pipeline.predict(dados_paciente)[0]
         pred_prob  = pipeline.predict_proba(dados_paciente)[0]
         pred_class = label_encoder.inverse_transform([pred_enc])[0]
+
+        st.session_state["pred_class"] = pred_class
+        st.session_state["pred_prob"]  = pred_prob
+        st.session_state["dados_paciente"] = dados_paciente
+
+    if "pred_class" in st.session_state:
+        pred_class = st.session_state["pred_class"]
+        pred_prob  = st.session_state["pred_prob"]
         pred_pt    = traducao_obesidade.get(pred_class, pred_class)
 
         st.markdown('<div class="section-title">Resultado da Previsão</div>', unsafe_allow_html=True)
         st.markdown(f'<div class="success-box"><b>Nível previsto:</b> {pred_pt}</div>',
                     unsafe_allow_html=True)
 
-        classes  = label_encoder.classes_
-        df_prob  = pd.DataFrame({
-            "Classe":        [traducao_obesidade.get(c, c) for c in classes],
-            "Probabilidade": pred_prob,
-        }).sort_values("Probabilidade", ascending=False)
+        # Gráfico + formulário de comparação lado a lado
+        col_chart, col_form = st.columns([1.3, 1])
 
-        st.subheader("Probabilidades por classe")
-        st.dataframe(df_prob, use_container_width=True)
-        fig_prob = px.bar(df_prob, x="Classe", y="Probabilidade", color="Classe",
-                          title="Probabilidade estimada por classe")
-        fig_prob.update_layout(showlegend=False)
-        st.plotly_chart(fig_prob, use_container_width=True)
+        with col_chart:
+            classes = label_encoder.classes_
+            df_prob = pd.DataFrame({
+                "Classe":        [traducao_obesidade.get(c, c) for c in classes],
+                "Probabilidade": pred_prob,
+            }).sort_values("Probabilidade", ascending=False)
+
+            fig_prob = px.bar(
+                df_prob,
+                x="Classe",
+                y="Probabilidade",
+                color="Classe",
+                title="Probabilidade estimada por classe",
+                text=df_prob["Probabilidade"].apply(lambda x: f"{x*100:.1f}%")
+            )
+            fig_prob.update_traces(width=0.7, textposition="outside")
+            fig_prob.update_layout(
+                showlegend=False,
+                bargap=0.2,
+                height=450,
+                title_font_size=18,
+                yaxis_tickformat=".0%"
+            )
+            st.plotly_chart(fig_prob, use_container_width=True)
+
+        with col_form:
+            st.markdown('<div class="model-card"><b>Comparação com IMC real</b><br>'
+                        '<span style="font-size:0.9em;color:#666;">Informe peso e altura para '
+                        'comparar a previsão do modelo com a classificação clínica por IMC.</span>'
+                        '</div>', unsafe_allow_html=True)
+
+            peso_real = st.number_input("Peso atual (kg)", min_value=20.0, max_value=300.0,
+                                        value=70.0, step=0.5)
+            altura_real = st.number_input("Altura (m)", min_value=0.50, max_value=2.50,
+                                          value=1.70, step=0.01)
+
+            imc, classe_imc = classificar_por_imc(peso_real, altura_real)
+
+            if imc is not None:
+                classe_imc_pt  = traducao_obesidade.get(classe_imc, classe_imc)
+                bate           = (classe_imc == pred_class)
+                cor_box        = "#e9f9ef" if bate else "#fff4e6"
+                cor_borda      = "#22c55e" if bate else "#f59e0b"
+                cor_texto      = "#14532d" if bate else "#7c4a03"
+                simbolo        = "✅" if bate else "⚠️"
+                rotulo_match   = "Previsão coincide com IMC" if bate else "Previsão diverge do IMC"
+
+                st.markdown(
+                    f"""<div style="background-color:{cor_box};color:{cor_texto};
+                    padding:14px 18px;border-radius:10px;border-left:5px solid {cor_borda};
+                    margin-top:10px;font-size:15px;">
+                    <b>IMC calculado:</b> {imc}<br>
+                    <b>Classe por IMC:</b> {classe_imc_pt}<br>
+                    <b>Previsão do modelo:</b> {pred_pt}<br>
+                    {simbolo} {rotulo_match}
+                    </div>""",
+                    unsafe_allow_html=True
+                )
+
+            st.divider()
+
+            # ── Salvar registro para melhoria do modelo ──────────────────────
+            st.markdown("<b>Salvar registro para melhoria do modelo</b>", unsafe_allow_html=True)
+            st.caption("O médico confirma qual é a classe real do paciente antes de salvar.")
+
+            classe_real_pt = st.selectbox(
+                "Classe real (confirmada pelo médico)",
+                list(traducao_obesidade.values()),
+                index=list(traducao_obesidade.values()).index(traducao_obesidade.get(classe_imc, "Peso Normal"))
+                      if classe_imc else 1
+            )
+            classe_real = {v: k for k, v in traducao_obesidade.items()}[classe_real_pt]
+
+            if st.button("💾 Salvar registro"):
+                # Monta linha no mesmo formato da tabela registros_medicos no Supabase.
+                # Os nomes das colunas devem bater com o SQL de criação da tabela.
+                dados_orig = st.session_state["dados_paciente"].iloc[0].to_dict()
+                registro = {
+                    "gender":          dados_orig["Gender"],
+                    "age":             float(dados_orig["Age"]),
+                    "height":          float(altura_real),
+                    "weight":          float(peso_real),
+                    "family_history":  dados_orig["family_history"],
+                    "favc":            dados_orig["FAVC"],
+                    "fcvc":            float(dados_orig["FCVC"]),
+                    "ncp":             float(dados_orig["NCP"]),
+                    "caec":            dados_orig["CAEC"],
+                    "smoke":           dados_orig["SMOKE"],
+                    "ch2o":            float(dados_orig["CH2O"]),
+                    "scc":             dados_orig["SCC"],
+                    "faf":             float(dados_orig["FAF"]),
+                    "tue":             float(dados_orig["TUE"]),
+                    "calc":            dados_orig["CALC"],
+                    "mtrans":          dados_orig["MTRANS"],
+                    "obesity_real":    classe_real,
+                    "predicao_modelo": pred_class,
+                    "imc":             float(imc) if imc is not None else None
+                }
+
+                try:
+                    supabase = get_supabase_client()
+                    supabase.table("registros_medicos").insert(registro).execute()
+                    st.success(f"Registro salvo no banco. Classe real: {classe_real_pt}")
+                except KeyError:
+                    st.error("Credenciais do Supabase não configuradas. "
+                             "Defina SUPABASE_URL e SUPABASE_KEY em Settings > Secrets.")
+                except Exception as e:
+                    st.error(f"Erro ao salvar no banco: {e}")
+
+            # ── Visualizar registros recentes salvos no banco ────────────────
+            with st.expander("📋 Ver registros salvos recentemente"):
+                try:
+                    supabase = get_supabase_client()
+                    resp = supabase.table("registros_medicos") \
+                                   .select("*") \
+                                   .order("created_at", desc=True) \
+                                   .limit(20) \
+                                   .execute()
+                    if resp.data:
+                        df_hist = pd.DataFrame(resp.data)
+                        st.dataframe(df_hist, use_container_width=True, height=300)
+
+                        # Download dos últimos 20 registros
+                        csv_bytes = df_hist.to_csv(index=False).encode("utf-8")
+                        st.download_button(
+                            "⬇️ Baixar registros (CSV)",
+                            data=csv_bytes,
+                            file_name="registros_medicos.csv",
+                            mime="text/csv"
+                        )
+                    else:
+                        st.info("Nenhum registro salvo ainda.")
+                except Exception as e:
+                    st.caption(f"Não foi possível carregar os registros: {e}")
 
 # ======================================================
 # Página 2 — Dashboard Analítico
@@ -351,10 +519,23 @@ elif pagina == "Dashboard Analítico":
 
     col1, col2 = st.columns(2)
     with col1:
-        fig = px.bar(contagem, x="Nível de obesidade", y="Quantidade", color="Nível de obesidade",
-                     title="Distribuição dos Níveis de Obesidade")
-        fig.update_layout(showlegend=False, xaxis_title="", yaxis_title="Quantidade de pacientes",
-                          title_font_size=20)
+        fig = px.bar(
+            contagem,
+            x="Nível de obesidade",
+            y="Quantidade",
+            color="Nível de obesidade",
+            title="Distribuição dos Níveis de Obesidade",
+            text="Quantidade"
+        )
+        fig.update_traces(width=0.7, textposition="outside")
+        fig.update_layout(
+            showlegend=False,
+            xaxis_title="",
+            yaxis_title="Quantidade de pacientes",
+            title_font_size=20,
+            bargap=0.2,
+            height=500
+        )
         st.plotly_chart(fig, use_container_width=True)
     with col2:
         fig = px.pie(contagem, names="Nível de obesidade", values="Quantidade",
