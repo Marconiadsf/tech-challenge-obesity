@@ -153,6 +153,17 @@ def carregar_dashboard():
     df["CAEC_PT"]            = df["CAEC"].map(traducao_caec)
     df["CALC_PT"]            = df["CALC"].map(traducao_alcool)
     df["MTRANS_PT"]          = df["MTRANS"].map(traducao_transporte)
+    # --- NOVO: Forçar a ordem clínica no dataframe inteiro ---
+    ordem_clinica = [
+        "Abaixo do Peso",
+        "Peso Normal",
+        "Sobrepeso Nível I",
+        "Sobrepeso Nível II",
+        "Obesidade Tipo I",
+        "Obesidade Tipo II",
+        "Obesidade Tipo III"
+    ]
+    df["Obesity_PT"] = pd.Categorical(df["Obesity_PT"], categories=ordem_clinica, ordered=True)
     return df
 
 df_dash = carregar_dashboard()
@@ -536,7 +547,11 @@ elif pagina == "Dashboard Analítico":
 
     st.divider()
 
-    contagem = df_dash["Obesity_PT"].value_counts().reset_index()
+    # contagem = df_dash["Obesity_PT"].value_counts().reset_index()
+    # contagem.columns = ["Nível de obesidade", "Quantidade"]
+    
+    # Usar sort_index() para respeitar a ordem categórica (Abaixo do Peso -> Obesidade III)
+    contagem = df_dash["Obesity_PT"].value_counts().sort_index().reset_index()
     contagem.columns = ["Nível de obesidade", "Quantidade"]
 
     col1, col2 = st.columns(2)
