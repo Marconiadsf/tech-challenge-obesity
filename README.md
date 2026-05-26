@@ -130,7 +130,7 @@ RandomForestClassifier(
 
 ## ✅ Resultados Obtidos
 
-| Métrica | Resultado |
+
 | Métrica | Resultado |
 |---|---:|
 | Acurácia na Validação Cruzada (K=10) | ~80.5% |
