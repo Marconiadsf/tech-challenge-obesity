@@ -2,37 +2,49 @@
 
 Este projeto foi desenvolvido como entrega do **Tech Challenge - Fase 4 da Pós-Tech FIAP**.
 
+## 🎯 Objetivo do Projeto
 O objetivo é criar uma solução de **Machine Learning** capaz de auxiliar uma equipe médica na estimativa do nível de obesidade de pacientes, utilizando informações sobre hábitos alimentares, histórico familiar, atividade física e estilo de vida.
 
-A aplicação final foi desenvolvida em **Streamlit** e inclui:
+Além da predição, a solução apresenta uma visão analítica dos dados e um **módulo de persistência em banco de dados** para apoiar a equipe médica na interpretação e coleta de novos padrões clínicos.
+
+---
+
+## 🛠️ Stack Tecnológica
+
+| Camada | Tecnologia |
+|---|---|
+| Linguagem | Python 3.12 |
+| EDA & ML | pandas · numpy · scikit-learn |
+| Serialização | joblib |
+| Visualização | plotly · matplotlib · seaborn |
+| App | Streamlit |
+| Persistência de dados | Supabase (PostgreSQL) |
+| Deploy | Streamlit Community Cloud · GCP (Via Google Cloud Run) |
+
+---
+
+## 🚀 Aplicação Online
+
+A aplicação final inclui:
 
 - sistema preditivo de nível de obesidade;
 - dashboard analítico com indicadores e gráficos;
 - explicação sobre prevenção de data leakage;
 - análise de fatores associados à obesidade.
 
----
 
-## 🚀 Aplicação Online
+### Links de acesso a aplicação on-line:
 
-Acesse a aplicação no Streamlit:
+#### Streamlit Community Cloud:
 
 🔗 https://tech-challenge-obesity-new2.streamlit.app/ - fork do projeto mais atualizado
 
 🔗 https://tech-challenge-obesity-kiwwtssmdzugnaeastnk29.streamlit.app/ - versão anterior - bug no github, resolução em andamento.
 
 
-Alternativamente: 
+#### Alternativamente: 
 
 🔗 https://tech-challenge-obesity-631788291348.us-central1.run.app - alternativa via GCP(Cloud Run).
-
----
-
-## 🎯 Objetivo do Projeto
-
-O desafio propõe o desenvolvimento de uma pipeline de Machine Learning para prever se uma pessoa apresenta ou pode vir a apresentar obesidade, com assertividade mínima de 75%.
-
-Além da predição, a solução apresenta uma visão analítica dos dados e um **módulo de persistência em banco de dados** para apoiar a equipe médica na interpretação e coleta de novos padrões clínicos.
 
 ---
 
