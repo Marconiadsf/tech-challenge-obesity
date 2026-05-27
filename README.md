@@ -17,12 +17,12 @@ A aplicação final foi desenvolvida em **Streamlit** e inclui:
 
 Acesse a aplicação no Streamlit:
 
-🔗 https://tech-challenge-obesity-kiwwtssmdzugnaeastnk29.streamlit.app/
+🔗 https://tech-challenge-obesity-new2.streamlit.app/ - fork do projeto mais atualizado
+
+🔗 https://tech-challenge-obesity-kiwwtssmdzugnaeastnk29.streamlit.app/ - versão anterior - bug no github, resolução em andamento.
 
 
 Alternativamente: 
-
-🔗 https://tech-challenge-obesity-new2.streamlit.app/ - fork do projeto
 
 🔗 https://tech-challenge-obesity-631788291348.us-central1.run.app - alternativa via GCP(Cloud Run).
 
