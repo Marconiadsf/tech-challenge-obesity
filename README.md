@@ -2,30 +2,49 @@
 
 Este projeto foi desenvolvido como entrega do **Tech Challenge - Fase 4 da Pós-Tech FIAP**.
 
+## 🎯 Objetivo do Projeto
 O objetivo é criar uma solução de **Machine Learning** capaz de auxiliar uma equipe médica na estimativa do nível de obesidade de pacientes, utilizando informações sobre hábitos alimentares, histórico familiar, atividade física e estilo de vida.
 
-A aplicação final foi desenvolvida em **Streamlit** e inclui:
+Além da predição, a solução apresenta uma visão analítica dos dados e um **módulo de persistência em banco de dados** para apoiar a equipe médica na interpretação e coleta de novos padrões clínicos.
+
+---
+
+## 🛠️ Stack Tecnológica
+
+| Camada | Tecnologia |
+|---|---|
+| Linguagem | Python 3.12 |
+| EDA & ML | pandas · numpy · scikit-learn |
+| Serialização | joblib |
+| Visualização | plotly · matplotlib · seaborn |
+| App | Streamlit |
+| Persistência de dados | Supabase (PostgreSQL) |
+| Deploy | Streamlit Community Cloud · GCP (Via Google Cloud Run) |
+
+---
+
+## 🚀 Aplicação Online
+
+A aplicação final inclui:
 
 - sistema preditivo de nível de obesidade;
 - dashboard analítico com indicadores e gráficos;
 - explicação sobre prevenção de data leakage;
 - análise de fatores associados à obesidade.
 
----
 
-## 🚀 Aplicação Online
+### Links de acesso a aplicação on-line:
 
-Acesse a aplicação no Streamlit:
+#### Streamlit Community Cloud:
 
-🔗 https://tech-challenge-obesity-kiwwtssmdzugnaeastnk29.streamlit.app/
+🔗 https://tech-challenge-obesity-new2.streamlit.app/ - fork do projeto mais atualizado
 
----
+🔗 https://tech-challenge-obesity-kiwwtssmdzugnaeastnk29.streamlit.app/ - versão anterior - bug no github, resolução em andamento.
 
-## 🎯 Objetivo do Projeto
 
-O desafio propõe o desenvolvimento de uma pipeline de Machine Learning para prever se uma pessoa apresenta ou pode vir a apresentar obesidade, com assertividade mínima de 75%.
+#### Alternativamente: 
 
-Além da predição, a solução também apresenta uma visão analítica dos dados para apoiar a equipe médica na interpretação dos principais fatores associados ao nível de obesidade.
+🔗 https://tech-challenge-obesity-631788291348.us-central1.run.app - alternativa via GCP(Cloud Run).
 
 ---
 
@@ -90,7 +109,8 @@ Foram comparados diferentes algoritmos de classificação:
 - Extra Trees;
 - Gradient Boosting;
 - SVC;
-- KNN.
+- KNN;
+- XGBoost
 
 A escolha do modelo final levou em consideração não apenas a acurácia, mas também:
 
@@ -106,36 +126,36 @@ A escolha do modelo final levou em consideração não apenas a acurácia, mas t
 
 O modelo final escolhido foi o **Random Forest Ajustado**.
 
-Foram utilizados hiperparâmetros para controlar a complexidade do modelo e reduzir risco de overfitting:
+Os hiperparâmetros foram otimizados com RandomizedSearchCV que alteram os parâmetros
+iniciais do Random Forest para melhorar o modelo:
 
 ```python
 RandomForestClassifier(
-    n_estimators=300,
+    n_estimators=500, # O Tuning aumentou de 300 para 500
     max_depth=10,
-    min_samples_split=10,
+    min_samples_split=2, # O Tuning reduziu de 10 para 2
     min_samples_leaf=4,
     max_features="sqrt",
     random_state=42
 )
-
+```
 
 ## ✅ Resultados Obtidos
 
+
 | Métrica | Resultado |
 |---|---:|
-| Acurácia no teste | ~79% |
-| Acurácia no treino | ~88% |
-| Gap treino-teste | ~9% |
-| Média da validação cruzada | ~80% |
-| Desvio da validação cruzada | ~1% |
+| Acurácia na Validação Cruzada (K=10) | ~80.5% |
+| Acurácia no Treino (In-sample) | ~88.4% |
+| Gap Treino-Validação (Overfitting proxy) | ~7.9% |
 
 O modelo atende ao requisito mínimo de assertividade acima de 75% e apresenta melhor equilíbrio entre desempenho e generalização quando comparado a modelos mais complexos que apresentaram maior risco de overfitting.
 
 ---
 
-## 📈 Dashboard Analítico
+## 📈 Recursos da Aplicação Streamlit
 
-A aplicação possui um dashboard em português com:
+### Dashboard
 
 - total de pacientes;
 - percentual de pacientes com obesidade;
@@ -149,15 +169,16 @@ A aplicação possui um dashboard em português com:
 - meio de transporte;
 - importância das variáveis do modelo.
 
----
+### Painel de Predição Avançado
 
-## 🩺 Prevenção de Data Leakage
+ - Gráfico de Probabilidade Clínico: Exibição das chances do paciente pertencer a cada classe através de um gráfico de barras ordenado de forma estática e progressiva por nível de gravidade (de Abaixo do Peso até Obesidade Tipo III).
+ - Cores Semânticas de Alerta: Mapeamento visual customizado no Plotly (escala Azul $\rightarrow$ Verde $\rightarrow$ Amarelo $\rightarrow$ Vermelho) para rápida absorção diagnóstica.
+ - Validação por IMC Real: Formulário interativo paralelo que calcula o IMC clínico tradicional e compara em tempo real se a predição baseada em comportamento coincide ou diverge do cenário físico atual do paciente.
 
-As variáveis `Weight` e `Height` foram removidas do modelo final.
-
-Essa decisão foi tomada porque o nível de obesidade pode estar diretamente relacionado ao IMC, que utiliza peso e altura em seu cálculo. Caso essas variáveis fossem utilizadas, o modelo poderia aprender uma relação muito direta com a variável alvo, gerando uma performance artificialmente elevada.
-
-Com essa abordagem, o modelo passa a considerar principalmente fatores comportamentais, histórico familiar e estilo de vida.
+### Integração com Banco de Dados Nuvem (Supabase)
+- Módulo de Feedback Loop: Interface para o médico auditar a predição, selecionar a "Classe Real" confirmada em consulta e salvar o registro diretamente em um banco de dados relacional (PostgreSQL via Supabase).
+ - Histórico em Tempo Real: Componente de expansão que consulta o banco de dados via API, exibe os últimos 20 registros avaliados na instituição e permite o download imediato da base atualizada em formato CSV para futuros retreinos do modelo.
+ - Segurança da Informação: Credenciais de conexão e chaves de API totalmente blindadas no servidor através do gerenciador de credenciais seguras do Streamlit (st.secrets).
 
 ---
 
@@ -169,10 +190,7 @@ tech-challenge-obesity/
 ├── app.py
 ├── requirements.txt
 ├── runtime.txt
-├── Obesity.csv
-├── obesity_dashboard.csv
-├── modelo_obesidade.pkl
-├── colunas_modelo.pkl
-├── label_encoder.pkl
+├── obesity.csv
+├── model_pipeline.pkl
 ├── notebook_modelagem.ipynb
 └── README.md ```
