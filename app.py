@@ -661,6 +661,7 @@ elif pagina == "Dashboard Analítico":
         </ul>
     
         Como peso e altura foram removidos do modelo, a solução demonstra capacidade de identificar padrões de risco utilizando predominantemente características comportamentais e hábitos de vida.
+         <br>v10
         </div>
         """,
         unsafe_allow_html=True
