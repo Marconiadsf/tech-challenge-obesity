@@ -39,12 +39,23 @@ A aplicação final inclui:
 
 🔗 https://tech-challenge-obesity-new2.streamlit.app/ - fork do projeto mais atualizado
 
-🔗 https://tech-challenge-obesity-kiwwtssmdzugnaeastnk29.streamlit.app/ - versão anterior - bug no github, resolução em andamento.
-
+🔗 https://tech-challenge-obesity-kiwwtssmdzugnaeastnk29.streamlit.app/ - Versão do repo principal
 
 #### Alternativamente: 
 
 🔗 https://tech-challenge-obesity-631788291348.us-central1.run.app - alternativa via GCP(Cloud Run).
+
+
+### Sobre o notebook 01_EDA_e_Treinamento_v10.ipynb:
+
+Para visualizar o notebook utilize os seguintes links:
+
+🔗 https://colab.research.google.com/drive/1-V48ZH02nPK7vhiqq9MGV4uu2AqSmqcK?usp=sharing  - via colab
+
+🔗 https://nbviewer.org/github/Marconiadsf/tech-challenge-obesity/blob/app/01_EDA_e_Treinamento_v10.ipynb - via nbviewer ou:
+    
+🔗 https://nbviewer.org/github/dglaranjeira/tech-challenge-obesity/blob/main/01_EDA_e_Treinamento_v10.ipynb 
+
 
 ---
 
