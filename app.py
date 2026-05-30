@@ -650,13 +650,21 @@ elif pagina == "Dashboard Analítico":
     st.plotly_chart(fig, use_container_width=True)
 
     st.divider()
-    st.markdown('<div class="section-title">Conclusão Executiva</div>', unsafe_allow_html=True)
-    st.markdown('<div class="success-box">A análise indica que fatores como histórico familiar, hábitos '
-                'alimentares, frequência de atividade física, consumo de água, uso de tecnologia e meio de '
-                'transporte contribuem para a identificação dos diferentes níveis de obesidade.<br><br>'
-                'Como peso e altura foram removidos do modelo, a solução se torna mais útil como ferramenta '
-                'de triagem baseada em comportamento e estilo de vida, apoiando a equipe médica na '
-                'identificação de padrões de risco.</div>', unsafe_allow_html=True)
+st.markdown(
+    """
+    <div class="success-box">
+    <b>Principais achados:</b>
+    <ul>
+        <li><b>Consumo de vegetais</b> e <b>idade</b> foram as variáveis mais importantes.</li>
+        <li><b>Refeições principais</b>, <b>uso de tecnologia</b>, <b>consumo de água</b> e <b>atividade física</b> também apresentaram forte influência.</li>
+        <li><b>Histórico familiar</b>, <b>gênero</b>, <b>consumo de álcool</b>, <b>hábitos entre refeições</b> e <b>meio de transporte</b> contribuíram para a classificação.</li>
+    </ul>
+
+    Como peso e altura foram removidos do modelo, a solução demonstra capacidade de identificar padrões de risco utilizando predominantemente características comportamentais e hábitos de vida.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # ======================================================
 # Página 3 — Sobre o Projeto
