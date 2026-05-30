@@ -47,12 +47,14 @@ A aplicação final inclui:
 
 
 ### Sobre o notebook 01_EDA_e_Treinamento_v10.ipynb:
-    Para visualizar o notebook utilize os seguintes links:
-    🔗 https://colab.research.google.com/drive/1-V48ZH02nPK7vhiqq9MGV4uu2AqSmqcK?usp=sharing  - via colab
 
-    🔗 https://nbviewer.org/github/Marconiadsf/tech-challenge-obesity/blob/app/01_EDA_e_Treinamento_v10.ipynb - via nbviewer ou:
+Para visualizar o notebook utilize os seguintes links:
+
+🔗 https://colab.research.google.com/drive/1-V48ZH02nPK7vhiqq9MGV4uu2AqSmqcK?usp=sharing  - via colab
+
+🔗 https://nbviewer.org/github/Marconiadsf/tech-challenge-obesity/blob/app/01_EDA_e_Treinamento_v10.ipynb - via nbviewer ou:
     
-    🔗 https://nbviewer.org/github/dglaranjeira/tech-challenge-obesity/blob/main/01_EDA_e_Treinamento_v10.ipynb 
+🔗 https://nbviewer.org/github/dglaranjeira/tech-challenge-obesity/blob/main/01_EDA_e_Treinamento_v10.ipynb 
 
 
 ---
